@@ -7,11 +7,7 @@ class SmartControl {
 
         this.writeValue(initialValue);
 
-        additionalValidators.forEach(additionalValidator => additionalValidator(this.#controlRef))
-    }
-
-    writeValue(value) {
-        this.#controlRef.setAttribute("value", value);
+        additionalValidators.forEach(additionalValidator => additionalValidator(this.#controlRef));
     }
 
     get value() {
@@ -21,13 +17,18 @@ class SmartControl {
     get control() {
         return this.#controlRef;
     }
+
+    writeValue(value) {
+        this.#controlRef.setAttribute("value", value);
+    }
 }
+
 class SmartPhoneControl extends SmartControl{
     #controlMask;
 
     constructor(selector, mask, additionalValidators = []) {
-        super(selector, mask, additionalValidators)
-
+        super(selector, mask, additionalValidators);
+        this.#controlMask = mask;
         this.#listenControlWriteValue();
     }
 
@@ -52,7 +53,7 @@ class SmartPhoneControl extends SmartControl{
 
     #getPhoneMaskWithAddedNumber(value, key) {
         const valueArray = [...value];
-        const currentIndex = valueArray.findIndex(position => position === '_')
+        const currentIndex = valueArray.findIndex(position => position === '_');
 
         valueArray[currentIndex] = key;
 

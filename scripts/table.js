@@ -217,4 +217,3 @@ class SmartTableWithControls extends SmartTable {
 //         }
 //     }))
 // }
-
