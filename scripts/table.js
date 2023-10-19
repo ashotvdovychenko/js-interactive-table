@@ -1,4 +1,3 @@
-// TODO: Extract selection logic in separate child class to keep Single Responsibility Principle for SmartTable and avoid GOD object;
 class SmartTable {
     #tableContainerRef;
     #tableHeaderRef;
@@ -6,7 +5,7 @@ class SmartTable {
     #colDef;
     #selectable;
 
-    constructor(selector, colDef, selectable = true) {
+    constructor(selector, colDef, selectable = false) {
         this.#tableContainerRef = document.querySelector(selector);
         this.#colDef = colDef;
         this.#selectable = selectable;
@@ -29,18 +28,12 @@ class SmartTable {
         });
     }
 
-    get getSelectedRows() {
-        if (this.#selectable) {
-            return [...this.#tableBodyRef.children]
-                .filter(rowRef => {
-                    const checkboxRef = rowRef.querySelector('input[type="checkbox"]');
+    get selectable() {
+        return this.#selectable;
+    }
 
-                    return checkboxRef.checked;
-                })
-                .map(rowRef => this.rowData.find(row => row.id === rowRef.dataset.id));
-        }
-
-        return []
+    get tableBodyRef() {
+        return this.#tableBodyRef;
     }
 
     setRowData(data) {
@@ -50,7 +43,7 @@ class SmartTable {
             rowRef.dataset.id = row.id;
 
             if (this.#selectable) {
-                const columnRef = document.createElement('th')
+                const columnRef = document.createElement('th');
                 const checkboxRef = document.createElement('input');
 
                 checkboxRef.type = 'checkbox';
@@ -95,6 +88,12 @@ class SmartTable {
 
     removeRow(id) {
         this.#tableBodyRef.querySelector(`tr[data-id='${id}']`).remove();
+    }
+
+    duplicateRow(id) {
+        const rowData = this.rowData.find(data => data.id === id);
+        rowData.id = new Date().getTime();
+        this.addRow(rowData)
     }
 
     #getTableBodyRef() {
@@ -158,35 +157,32 @@ class SmartTable {
     }
 }
 
-class SmartTableWithControls extends SmartTable {
-    #deleteButtonRef;
-    #duplicateButtonRef;
+class SmartSelectableTable extends SmartTable{
 
-    constructor(selector, colDef, selectable = true, deleteButtonSelector, duplicateButtonSelector) {
-        super(selector, colDef, selectable);
-        this.#deleteButtonRef = document.querySelector(deleteButtonSelector);
-        this.#duplicateButtonRef = document.querySelector(duplicateButtonSelector);
-
-        this.#handleDeleteButtonClick();
-        this.#handleDuplicateButtonClick();
+    constructor(selector, colDef) {
+        super(selector, colDef, true);
     }
 
-    #handleDeleteButtonClick() {
-        this.#deleteButtonRef.addEventListener('click', () => {
-            this.getSelectedRows.forEach(selectedRow => this.removeRow(selectedRow.id))
-        })
+    get getSelectedRows() {
+        if (this.selectable) {
+            return [...this.tableBodyRef.children]
+                .filter(rowRef => {
+                    const checkboxRef = rowRef.querySelector('input[type="checkbox"]');
+
+                    return checkboxRef.checked;
+                })
+                .map(rowRef => this.rowData.find(row => row.id === rowRef.dataset.id));
+        }
+
+        return []
     }
 
-    #handleDuplicateButtonClick() {
-        this.#duplicateButtonRef.addEventListener('click', () => {
-            this.getSelectedRows.forEach(selectedRow => {
-                const duplicatedRow = { ...selectedRow };
+    removeSelectedRows() {
+        this.getSelectedRows.forEach(selectedRow => this.removeRow(selectedRow.id));
+    }
 
-                duplicatedRow.id = new Date().getTime();
-
-                this.addRow(duplicatedRow);
-            })
-        })
+    duplicateSelectedRows() {
+        this.getSelectedRows.forEach(selectedRow => this.duplicateRow(selectedRow.id));
     }
 }
 
