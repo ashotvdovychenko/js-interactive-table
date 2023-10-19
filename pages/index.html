@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Лабораторна робота 5</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <form class="form-group border rounded mt-3 p-3 smart-form">
+            <label for="phone">Введіть номер телефону:</label>
+            <input class="form-control smart-phone-control" type="text" id="phone" name="phoneNumber">
+            <small class="form-text text-danger" id="phone-error-container"></small>
+
+            <div class="my-3">
+                <span>Оберіть стать:</span>
+
+                <div class="d-flex gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="male" name="gender" value="Чоловічий" checked>
+                        <label class="form-check-label" for="male">Чоловік</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" id="female" name="gender" value="Жіночий">
+                        <label class="form-check-label" for="female">Жінка</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <input class="btn btn-primary" id="form-submit-btn" type="submit" value="Зареєструватися" disabled>
+
+                <span>
+                    <button type="button" class="btn btn-warning ml-auto smart-table-duplicate-button">Продублювати обрані записи</button>
+                    <button type="button" class="btn btn-danger ml-auto smart-table-delete-button">Видалити обрані записи</button>
+                </span>
+            </div>
+        </form>
+
+        <table class="table table-striped smart-table">
+
+        </table>
+    </div>
+
+    <script src="../scripts/form.js"></script>
+    <script src="../scripts/table.js"></script>
+    <script src="../scripts/script.js"></script>
+</body>
+</html>
