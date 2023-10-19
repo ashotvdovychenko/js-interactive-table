@@ -21,8 +21,8 @@ const smartTableColDef = [
     { id: 3, headerText: 'Стать', propertyName: 'gender' },
 ];
 
-const smartForm = new SmartForm('.smart-form',  (data) => smartTable.addRow(data));
 const smartTable = new SmartSelectableTable('.smart-table', smartTableColDef);
+const smartForm = new SmartForm('.smart-form',  (data) => smartTable.addRow(data));
 const smartPhoneControl = new SmartPhoneControl('.smart-phone-control', ukrainianPhoneNumberMask, additionalPhoneControlValidators);
 
 smartTable.setRowData(data);

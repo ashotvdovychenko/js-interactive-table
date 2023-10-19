@@ -3,14 +3,12 @@ class SmartTable {
     #tableHeaderRef;
     #tableBodyRef;
     #colDef;
-    #selectable;
 
-    constructor(selector, colDef, selectable = false) {
+    constructor(selector, colDef) {
         this.#tableContainerRef = document.querySelector(selector);
         this.#colDef = colDef;
-        this.#selectable = selectable;
 
-        this.#tableHeaderRef = this.#getTableHeaderRef(colDef, selectable);
+        this.#tableHeaderRef = this.#getTableHeaderRef(colDef);
         this.#tableBodyRef = this.#getTableBodyRef();
 
         this.#drawTable(this.#tableBodyRef, this.#tableHeaderRef);
@@ -19,7 +17,6 @@ class SmartTable {
     get rowData() {
         return [...this.#tableBodyRef.children].map(row => {
             return [...row.children]
-                .slice(this.#selectable ? 1 : 0)
                 .reduce((acc, col, i) => {
                     acc[this.#colDef[i].propertyName] = col.textContent;
 
@@ -28,30 +25,22 @@ class SmartTable {
         });
     }
 
-    get selectable() {
-        return this.#selectable;
+    get tableHeaderRef() {
+        return this.#tableHeaderRef;
     }
 
     get tableBodyRef() {
         return this.#tableBodyRef;
     }
 
+    get colDef() {
+        return this.#colDef
+    }
+
     setRowData(data) {
         for (let row of data) {
-            const rowRef = document.createElement('tr');
-
+            const rowRef = this.#getRowRef();
             rowRef.dataset.id = row.id;
-
-            if (this.#selectable) {
-                const columnRef = document.createElement('th');
-                const checkboxRef = document.createElement('input');
-
-                checkboxRef.type = 'checkbox';
-                checkboxRef.classList.add('form-check-input');
-
-                columnRef.appendChild(checkboxRef);
-                rowRef.appendChild(columnRef);
-            }
 
             for (let col of this.#colDef) {
                 const columnRef = document.createElement('td');
@@ -66,14 +55,8 @@ class SmartTable {
     }
 
     addRow(row) {
-        const rowRef = document.createElement('tr');
+        const rowRef = this.#getRowRef();;
         rowRef.dataset.id = row.id;
-
-        if (this.#selectable) {
-            const columnRef = this.#getSelectControlColRef();
-
-            rowRef.appendChild(columnRef);
-        }
 
         for (let col of this.#colDef) {
             const columnRef = document.createElement('td');
@@ -100,22 +83,13 @@ class SmartTable {
         return document.createElement('tbody');
     }
 
-    #getTableHeaderRef(colDef, selectable) {
+    #getRowRef() {
+        return document.createElement('tr');
+    }
+
+    #getTableHeaderRef(colDef) {
         const theadRef = document.createElement('thead');
         const rowRef = document.createElement('tr')
-
-        if (selectable) {
-            const columnRef = document.createElement('th')
-            const checkboxRef = document.createElement('input');
-
-            checkboxRef.type = 'checkbox';
-            checkboxRef.classList.add('form-check-input');
-
-            columnRef.appendChild(checkboxRef);
-            rowRef.appendChild(columnRef);
-
-            this.#handleSelectAllControlChange(checkboxRef);
-        }
 
         for (let col of colDef) {
             const columnRef = document.createElement('th')
@@ -126,6 +100,79 @@ class SmartTable {
         theadRef.appendChild(rowRef);
 
         return theadRef;
+    }
+
+    #drawTable(bodyRef, headerRef) {
+        this.#tableContainerRef.innerHTML = '';
+        this.#tableContainerRef.appendChild(bodyRef);
+        this.#tableContainerRef.appendChild(headerRef);
+    }
+}
+
+class SmartSelectableTable extends SmartTable {
+
+    constructor(selector, colDef) {
+        super(selector, colDef);
+        this.#addHeaderControlCol();
+    }
+
+    get rowData() {
+        return [...this.tableBodyRef.children].map(row => {
+            return [...row.children]
+                .slice(1)
+                .reduce((acc, col, i) => {
+                    acc[this.colDef[i].propertyName] = col.textContent;
+
+                    return acc;
+                }, {});
+        });
+    }
+
+    get getSelectedRows() {
+        return [...this.tableBodyRef.children]
+            .filter(rowRef => {
+                const checkboxRef = rowRef.querySelector('input[type="checkbox"]');
+
+                return checkboxRef.checked;
+            })
+            .map(rowRef => this.rowData.find(row => row.id === rowRef.dataset.id));
+    }
+
+    setRowData(data) {
+        super.setRowData(data);
+        for (let rowRef of this.tableBodyRef.childNodes) {
+            const columnRef = this.#getSelectControlColRef();
+            rowRef.insertBefore(columnRef, rowRef.firstChild);
+        }
+    }
+
+    addRow(row) {
+        super.addRow(row);
+        const rowRef = this.tableBodyRef.lastChild;
+
+        const columnRef = this.#getSelectControlColRef();
+        rowRef.insertBefore(columnRef, rowRef.firstChild);
+    }
+
+    removeSelectedRows() {
+        this.getSelectedRows.forEach(selectedRow => this.removeRow(selectedRow.id));
+    }
+    duplicateSelectedRows() {
+        this.getSelectedRows.forEach(selectedRow => this.duplicateRow(selectedRow.id));
+    }
+
+    #addHeaderControlCol() {
+        const rowRef = this.tableHeaderRef.firstChild;
+        const columnRef = document.createElement('th')
+        const checkboxRef = document.createElement('input');
+
+        checkboxRef.type = 'checkbox';
+        checkboxRef.classList.add('form-check-input');
+
+        columnRef.appendChild(checkboxRef);
+        rowRef.insertBefore(columnRef, rowRef.firstChild);
+
+        this.#handleSelectAllControlChange(checkboxRef);
     }
 
     #getSelectControlColRef() {
@@ -142,47 +189,12 @@ class SmartTable {
 
     #handleSelectAllControlChange(controlRef) {
         controlRef.addEventListener('change', (event) => {
-            [...this.#tableBodyRef.children].forEach(rowRef => {
+            [...this.tableBodyRef.children].forEach(rowRef => {
                 const checkboxRef = rowRef.querySelector('input[type="checkbox"]');
 
                 checkboxRef.checked = event.target.checked;
             })
         })
-    }
-
-    #drawTable(bodyRef, headerRef) {
-        this.#tableContainerRef.innerHTML = '';
-        this.#tableContainerRef.appendChild(bodyRef);
-        this.#tableContainerRef.appendChild(headerRef);
-    }
-}
-
-class SmartSelectableTable extends SmartTable{
-
-    constructor(selector, colDef) {
-        super(selector, colDef, true);
-    }
-
-    get getSelectedRows() {
-        if (this.selectable) {
-            return [...this.tableBodyRef.children]
-                .filter(rowRef => {
-                    const checkboxRef = rowRef.querySelector('input[type="checkbox"]');
-
-                    return checkboxRef.checked;
-                })
-                .map(rowRef => this.rowData.find(row => row.id === rowRef.dataset.id));
-        }
-
-        return []
-    }
-
-    removeSelectedRows() {
-        this.getSelectedRows.forEach(selectedRow => this.removeRow(selectedRow.id));
-    }
-
-    duplicateSelectedRows() {
-        this.getSelectedRows.forEach(selectedRow => this.duplicateRow(selectedRow.id));
     }
 }
 
