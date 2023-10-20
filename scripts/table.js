@@ -149,17 +149,29 @@ class SmartSelectableTable extends SmartTable {
 
     addRow(row) {
         super.addRow(row);
+
+        const tableSelectAllControl = document.querySelector('thead input[type="checkbox"]');
         const rowRef = this.tableBodyRef.lastChild;
 
         const columnRef = this.#getSelectControlColRef();
         rowRef.insertBefore(columnRef, rowRef.firstChild);
+
+        tableSelectAllControl.indeterminate = true;
     }
 
     removeSelectedRows() {
+        const tableSelectAllControl = document.querySelector('thead input[type="checkbox"]');
+
         this.getSelectedRows.forEach(selectedRow => this.removeRow(selectedRow.id));
+        tableSelectAllControl.checked = false;
+        tableSelectAllControl.indeterminate = false;
+
     }
     duplicateSelectedRows() {
+        const tableSelectAllControl = document.querySelector('thead input[type="checkbox"]');
+
         this.getSelectedRows.forEach(selectedRow => this.duplicateRow(selectedRow.id));
+        tableSelectAllControl.indeterminate = true;
     }
 
     #addHeaderControlCol() {
