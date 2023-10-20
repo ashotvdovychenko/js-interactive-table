@@ -152,11 +152,13 @@ class SmartSelectableTable extends SmartTable {
 
         const tableSelectAllControl = document.querySelector('thead input[type="checkbox"]');
         const rowRef = this.tableBodyRef.lastChild;
-
         const columnRef = this.#getSelectControlColRef();
         rowRef.insertBefore(columnRef, rowRef.firstChild);
 
-        tableSelectAllControl.indeterminate = true;
+        this.#registerCheckbox();
+        if(tableSelectAllControl.checked){
+            tableSelectAllControl.indeterminate = true;
+        }
     }
 
     removeSelectedRows() {
