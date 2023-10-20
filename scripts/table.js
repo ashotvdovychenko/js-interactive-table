@@ -199,7 +199,7 @@ class SmartSelectableTable extends SmartTable {
     }
 
     #registerCheckbox() {
-        const allSelectControls = [...document.querySelectorAll('thead input[type="checkbox"]')];
+        const allSelectControls = [...document.querySelectorAll('tbody input[type="checkbox"]')];
 
         allSelectControls.forEach(checkbox => {
             checkbox.removeEventListener('change', this.#handleCheckboxChange);
@@ -220,14 +220,11 @@ class SmartSelectableTable extends SmartTable {
         if (isAllSelected) {
             tableSelectAllControl.checked = true;
             tableSelectAllControl.indeterminate = false;
-            console.log("Checked");
         } else if(isAnySelected){
             tableSelectAllControl.indeterminate = true;
-            console.log("Indeterminate");
         }else {
             tableSelectAllControl.checked = false;
             tableSelectAllControl.indeterminate = false;
-            console.log("Unchecked");
         }
     }
 }
