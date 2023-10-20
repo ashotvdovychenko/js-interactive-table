@@ -55,7 +55,7 @@ class SmartTable {
     }
 
     addRow(row) {
-        const rowRef = this.#getRowRef();;
+        const rowRef = this.#getRowRef();
         rowRef.dataset.id = row.id;
 
         for (let col of this.#colDef) {
@@ -144,6 +144,7 @@ class SmartSelectableTable extends SmartTable {
             const columnRef = this.#getSelectControlColRef();
             rowRef.insertBefore(columnRef, rowRef.firstChild);
         }
+        this.#registerCheckbox();
     }
 
     addRow(row) {
@@ -196,32 +197,37 @@ class SmartSelectableTable extends SmartTable {
             })
         })
     }
+
+    #registerCheckbox() {
+        const allSelectControls = [...document.querySelectorAll('thead input[type="checkbox"]')];
+
+        allSelectControls.forEach(checkbox => {
+            checkbox.removeEventListener('change', this.#handleCheckboxChange);
+        });
+
+        allSelectControls.forEach(checkbox => {
+            checkbox.addEventListener('change', this.#handleCheckboxChange);
+        });
+    }
+
+    #handleCheckboxChange() {
+        const tableSelectAllControl = document.querySelector('thead input[type="checkbox"]');
+        const allSelectControls = [...document.querySelectorAll('tbody input[type="checkbox"]')];
+
+        const isAllSelected = allSelectControls.every(control => control.checked);
+        const isAnySelected = allSelectControls.some(control => control.checked);
+
+        if (isAllSelected) {
+            tableSelectAllControl.checked = true;
+            tableSelectAllControl.indeterminate = false;
+            console.log("Checked");
+        } else if(isAnySelected){
+            tableSelectAllControl.indeterminate = true;
+            console.log("Indeterminate");
+        }else {
+            tableSelectAllControl.checked = false;
+            tableSelectAllControl.indeterminate = false;
+            console.log("Unchecked");
+        }
+    }
 }
-
-// tableSelectAllControl.addEventListener('click', (event) => {
-//     const tableCheckboxRefs = document.querySelectorAll('.table-status-checkbox');
-//
-//     tableCheckboxRefs.forEach(tableCheckboxRef => {
-//         tableCheckboxRef.checked = event.target.checked;
-//     });
-// })
-
-
-// function registerCheckbox() {
-//     const allSelectControls = document.querySelectorAll('.table-status-checkbox');
-//
-//     allSelectControls.forEach(control => control.addEventListener('click', () => {
-//         const isAllSelected = [...allSelectControls].every(control => control.checked)
-//         const isAllDeselected = [...allSelectControls].every(control => !control.checked);
-//
-//         if (tableSelectAllControl.checked && isAllDeselected) {
-//             tableSelectAllControl.checked = false;
-//             tableSelectAllControl.indeterminate = false;
-//         } else if (isAllSelected) {
-//             tableSelectAllControl.checked = true;
-//             tableSelectAllControl.indeterminate = false;
-//         } else {
-//             tableSelectAllControl.indeterminate = true;
-//         }
-//     }))
-// }
